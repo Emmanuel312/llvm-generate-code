@@ -185,6 +185,7 @@ class GrammarCheckerVisitor(ParseTreeVisitor):
             token = ctx.identifier(i).IDENTIFIER().getPayload()
             if ctx.expression(i) != None:
                 expr_type, cte_value, ir_register = self.visit(ctx.expression(i))
+
                 if expr_type == Type.VOID:
                     err("ERROR: trying to assign void expression to variable '" + name + "' in line " + str(
                         token.line) + " and column " + str(token.column) + "\n")
@@ -537,6 +538,7 @@ class GrammarCheckerVisitor(ParseTreeVisitor):
                 token.column) + "\n")
             exit(-1)
 
+        args_cte_value = []
         for i in range(len(ctx.expression())):
             arg_type, arg_cte_value, arg_ir_register = self.visit(ctx.expression(i))
             if i < len(args):
@@ -549,6 +551,15 @@ class GrammarCheckerVisitor(ParseTreeVisitor):
                     err("WARNING: possible loss of information converting float expression to int expression in parameter " + str(
                         i) + " of function '" + name + "' in line " + str(token.line) + " and column " + str(
                         token.column) + "\n")
+
+            args_cte_value.append(
+                f"{llvm_type(arg_type)} "
+                f"{float_to_hex(arg_cte_value) if arg_type == Type.FLOAT else int(arg_cte_value)}")
+
+        params_separator = ", "
+        function_llvm_type = llvm_type(self.ids_defined[name][0])
+        print(f"  call {function_llvm_type} @{name}({params_separator.join(args_cte_value)})")
+
         return tyype, cte_value, ir_register
 
     # Visit a parse tree produced by GrammarParser#arguments.
