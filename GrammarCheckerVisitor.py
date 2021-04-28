@@ -551,10 +551,10 @@ class GrammarCheckerVisitor(ParseTreeVisitor):
                     err("WARNING: possible loss of information converting float expression to int expression in parameter " + str(
                         i) + " of function '" + name + "' in line " + str(token.line) + " and column " + str(
                         token.column) + "\n")
-
-            args_cte_value.append(
-                f"{llvm_type(arg_type)} "
-                f"{float_to_hex(arg_cte_value) if arg_type == Type.FLOAT else int(arg_cte_value)}")
+            if arg_cte_value:
+                args_cte_value.append(
+                    f"{llvm_type(arg_type)} "
+                    f"{float_to_hex(arg_cte_value) if arg_type == Type.FLOAT else int(arg_cte_value)}")
 
         params_separator = ", "
         function_llvm_type = llvm_type(self.ids_defined[name][0])
